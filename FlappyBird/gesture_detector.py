@@ -9,11 +9,14 @@ class GestureDetector:
         self.hands = self.mp_hands.Hands(max_num_hands=1)
         self.cam = cv2.VideoCapture(0)
         self.gesture_fist_detected = False
+        self.gesture_peace_detected = False
         self.running = True
         self.thread = threading.Thread(target=self._detect_loop)
         self.thread.daemon = True
         self.thread.start()
         self.mp_draw = mp.solutions.drawing_utils
+        self.prev_positions = []
+        self.max_buffer = 10
 
     def _is_fist(self, landmarks):
         finger_tips = [4, 8, 12, 16, 20]
@@ -26,6 +29,15 @@ class GestureDetector:
 
         return folded_fingers >= 4
 
+    def _is_peace(self, landmarks):
+        index_extended = landmarks[8].y < landmarks[6].y
+        middle_extended = landmarks[12].y < landmarks[10].y
+
+        ring_folded = landmarks[16].y > landmarks[14].y
+        pinky_folded = landmarks[20].y > landmarks[18].y
+
+        return index_extended and middle_extended and ring_folded and pinky_folded
+
     def _detect_loop(self):
         while self.running:
             success, frame = self.cam.read()
@@ -36,6 +48,7 @@ class GestureDetector:
             results = self.hands.process(frame_rgb)
 
             self.gesture_fist_detected = False
+            self.gesture_peace_detected = False
 
             if results.multi_hand_landmarks:
                 for handLms in results.multi_hand_landmarks:
@@ -45,6 +58,11 @@ class GestureDetector:
                     if self._is_fist(handLms.landmark):
                         self.gesture_fist_detected = True
                         cv2.putText(frame, "Jumping", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                        break
+
+                    if self._is_peace(handLms.landmark):
+                        self.gesture_peace_detected = True
+                        cv2.putText(frame, "Starting", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
                         break
 
             # frame = cv2.flip(frame, 1)

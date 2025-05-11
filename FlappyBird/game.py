@@ -8,8 +8,8 @@ class Game:
         self.WIDTH = width
         self.HEIGHT = height
 
-        self.PIPE_GAP = 500
-        self.PIPE_FREQUENCY = 2000
+        self.PIPE_GAP = 400
+        self.PIPE_FREQUENCY = 3000
         self.PIPE_SPEED = 2
 
         self.WHITE = (255, 255, 255)
@@ -33,6 +33,7 @@ class Game:
     def draw_background(self, screen):
         screen.blit(self.background, (0, 0))
 
+    def draw_ground(self, screen):
         screen.blit(self.ground, (self.ground_scroll, self.HEIGHT - 100))
         screen.blit(self.ground, (self.ground_scroll + self.WIDTH, self.HEIGHT - 100))
 
@@ -41,11 +42,14 @@ class Game:
             if abs(self.ground_scroll) > self.WIDTH:
                 self.ground_scroll = 0
 
+
     def draw(self, screen):
         self.draw_background(screen)
 
         for pipe in self.pipes:
             pipe.draw(screen)
+
+        self .draw_ground(screen)
 
         self.bird.draw(screen)
 
@@ -58,7 +62,7 @@ class Game:
             screen.blit(overlay, (0, 0))
 
             game_over_text = self.font.render("Game Over!", True, self.RED)
-            restart_text = pygame.font.SysFont(None, 30).render("Press R to Restart", True, self.WHITE)
+            restart_text = pygame.font.SysFont(None, 30).render("Show Peace Sign to Restart", True, self.WHITE)
             screen.blit(game_over_text, (self.WIDTH // 2 - game_over_text.get_width() // 2,
                                          self.HEIGHT // 2 - game_over_text.get_height() // 2))
             screen.blit(restart_text, (self.WIDTH // 2 - restart_text.get_width() // 2,
